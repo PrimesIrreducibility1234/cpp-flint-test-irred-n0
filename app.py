@@ -12,13 +12,13 @@ HTML = """
   <meta charset="UTF-8">
   <title>C++ FLINT Support Generator</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
     input, button { font-size: 16px; padding: 10px; margin: 5px; }
-    pre { background: #f6f6f6; padding: 16px; border-radius: 10px; white-space: pre-wrap; max-height: 600px; overflow: auto; }
   </style>
 </head>
 <body>
   <h1>C++ FLINT Support Generator</h1>
+  <p>Enter DEG, then the server runs the C++ program and downloads out.txt.</p>
   <form method="POST" action="/generate">
     <label>DEG:</label>
     <input name="deg" type="number" value="20" min="1" max="25">
@@ -70,4 +70,8 @@ def generate():
         with open(out_path, "r") as f:
             text = f.read()
 
-    return Response(text, mimetype="text/plain")
+    return Response(
+        text,
+        mimetype="text/plain",
+        headers={"Content-Disposition": "attachment; filename=out.txt"}
+    )
