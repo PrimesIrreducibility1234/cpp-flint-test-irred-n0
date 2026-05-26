@@ -17,8 +17,8 @@ HTML = """
   </style>
 </head>
 <body>
-  <h1>C++ FLINT Support Generator</h1>
-  <p>Enter DEG, then the server runs the C++ program and downloads out.txt.</p>
+  <h1>Data Generator for Minkowski Indecomposability of Polynomials</h1>
+  <p>Enter DEG, then the site downloads out.txt for the support sets that are irreducible not accounted for by the Crowdmath and previous PRIMES papers.</p>
   <form method="POST" action="/generate">
     <label>DEG:</label>
     <input name="deg" type="number" value="20" min="1" max="25">
