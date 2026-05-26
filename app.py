@@ -13,7 +13,7 @@ HTML = """
   <title>C++ FLINT Support Generator</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    input, button { font-size: 16px; padding: 10px; }
+    input, button { font-size: 16px; padding: 10px; margin: 5px; }
     pre { background: #f6f6f6; padding: 16px; border-radius: 10px; white-space: pre-wrap; max-height: 600px; overflow: auto; }
   </style>
 </head>
@@ -39,10 +39,10 @@ def generate():
     try:
         deg_int = int(deg)
     except ValueError:
-        return "Invalid DEG", 400
+        return Response("Invalid DEG", mimetype="text/plain", status=400)
 
     if deg_int < 1 or deg_int > 25:
-        return "Use 1 <= DEG <= 25 for now.", 400
+        return Response("Use 1 <= DEG <= 25 for now.", mimetype="text/plain", status=400)
 
     with tempfile.TemporaryDirectory() as tmp:
         result = subprocess.run(
@@ -52,14 +52,14 @@ def generate():
             cwd=tmp,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=60
+            timeout=120
         )
 
         out_path = os.path.join(tmp, "out.txt")
 
         if result.returncode != 0:
             return Response(
-                "Program failed.\n\nSTDERR:\n" + result.stderr,
+                "Program failed.\n\nSTDOUT:\n" + result.stdout + "\n\nSTDERR:\n" + result.stderr,
                 mimetype="text/plain",
                 status=500
             )
