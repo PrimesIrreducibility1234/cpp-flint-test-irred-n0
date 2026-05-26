@@ -1,0 +1,5 @@
+{
+  "name": "cpp-flint",
+  "image": "mcr.microsoft.com/devcontainers/cpp:1-ubuntu",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libflint-dev libgmp-dev libmpfr-dev"
+}
