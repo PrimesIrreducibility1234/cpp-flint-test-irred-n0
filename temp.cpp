@@ -296,7 +296,6 @@ int main() {
 		std::ofstream file("coeff.txt");
 		std::streambuf* original_buf = std::cout.rdbuf(); 
 		std::cout.rdbuf(file.rdbuf());
-		int numtested = 0;
 	int maxdeg = 8;
 	int maxcoeff = 5;
 	cin>>maxdeg>>maxcoeff;
@@ -306,8 +305,6 @@ int main() {
 	}
 	f.resize(maxdeg + 1);
 	for(long long index=1; index<totalnum; index++) {
-		if(numtested%6000 == 0)    cerr << "numtested = " << numtested << " / " << totalnum << '\n';
-		numtested++;
 		numodd = 0;
 		maxnum = 0;
 		maxindex = 0;
