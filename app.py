@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 HTML = """
 <!DOCTYPE html>
-<html>
+<html> 
 <head>
   <meta charset="UTF-8">
   <title>C++ FLINT Support Generator</title>
