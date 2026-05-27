@@ -256,8 +256,8 @@ bool dfsFactorization(int idx, const fmpz_poly_t F, const fmpz_poly_factor_t fac
 		bool ok = false;
 
 		if (validPoly(g)) {
-			fmpz_poly_divexact(h, F, g);
-			if (validPoly(h)) {
+    		if (fmpz_poly_divides(h, F, g)) {
+        		if (validPoly(h)) {
 				ok = true;
 				/*cout << "Factorization in N0: (";
 				fmpz_poly_print_pretty(g, "x");
