@@ -301,7 +301,7 @@ def generate_minkowski():
         mimetype="text/plain",
         headers={"Content-Disposition": "attachment; filename=minkowski.txt"}
     )
-  @app.post("/check_irred")
+@app.post("/check_irred")
 def check_irred():
     coeff_text = request.form.get("coeffs", "").strip()
 
