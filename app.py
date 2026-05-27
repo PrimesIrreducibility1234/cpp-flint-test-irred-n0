@@ -32,7 +32,26 @@ HTML = """
 
   <form method="POST" action="/generate_coeffs">
     <h2>Coefficient polynomial generator</h2>
-    <p>Enter maxdeg and maxcoeff. This runs temp.cpp and downloads coeff.txt.</p>
+    <p>
+  Enter maxdeg and maxcoeff. This runs temp.cpp and downloads coeff.txt.
+</p>
+
+<p>
+  Each output line has the polynomial, followed by a 9-digit boolean code.
+  The digits are concatenated 0/1 results saying whether each irreducibility test detected the polynomial.
+</p>
+
+<p>
+  The order of the boolean code is:
+  <br>
+  <code>
+    PrimeValue, Eisenstein, Perron, Ostrowski, Bevelacqua, Monolithic, CrowdMath, Kolekar, Bonciocat
+  </code>
+</p>
+
+<p>
+  Example: <code>100000001</code> means the Prime Value Test and Bonciocat's Criterion detected irreducibility, but the other seven tests did not.
+</p>
 
     <label>maxdeg:</label>
     <input name="maxdeg" type="number" value="3" min="1" max="6">
