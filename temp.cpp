@@ -380,7 +380,7 @@ int main() {
 		fmpz_poly_content(content, poly);
 
 		/*if (fmpz_cmp_ui(content, 1) != 0 || fac->num > 1 || (fac->num == 1 && fac->exp[0] > 1)) {
-			/*cout<<"Factorization in Z: ";
+			cout<<"Factorization in Z: ";
 			for (int i = 0; i < fac->num; i++) {
 				if(i > 0) cout << " * ";
 				cout << "(";
