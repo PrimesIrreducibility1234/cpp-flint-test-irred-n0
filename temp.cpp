@@ -296,8 +296,8 @@ int main() {
 		std::ofstream file("coeff.txt");
 		std::streambuf* original_buf = std::cout.rdbuf(); 
 		std::cout.rdbuf(file.rdbuf());
-	int maxdeg = 8;
-	int maxcoeff = 5;
+	int maxdeg = 3;
+	int maxcoeff = 2;
 	cin>>maxdeg>>maxcoeff;
 	long long totalnum = 1;
 	for(int i=0; i<=maxdeg; i++) {
