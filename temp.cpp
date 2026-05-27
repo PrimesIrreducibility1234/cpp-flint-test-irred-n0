@@ -414,4 +414,8 @@ int main() {
 		fmpz_poly_clear(poly);
 		fmpz_poly_factor_clear(fac);
 	}
+		cout.rdbuf(original_buf);
+	file.close();
+
+	return 0;
 }
