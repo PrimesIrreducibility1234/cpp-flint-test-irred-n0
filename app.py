@@ -35,10 +35,9 @@ HTML = """
     <p>Enter maxdeg and maxcoeff. This runs temp.cpp and downloads coeff.txt.</p>
 
     <label>maxdeg:</label>
-    <input name="maxdeg" type="number" value="8" min="1" max="12">
-
+    <input name="maxdeg" type="number" value="3" min="1" max="6">
     <label>maxcoeff:</label>
-    <input name="maxcoeff" type="number" value="5" min="1" max="20">
+    <input name="maxcoeff" type="number" value="2" min="1" max="6">
 
     <button type="submit">Generate coeff.txt</button>
   </form>
@@ -51,55 +50,73 @@ def home():
     return HTML
 
 
-@app.post("/generate")
-def generate():
-    deg = request.form.get("deg", "20").strip()
+@app.post("/generate_coeffs")
+def generate_coeffs():
+    maxdeg = request.form.get("maxdeg", "3").strip()
+    maxcoeff = request.form.get("maxcoeff", "2").strip()
 
     try:
-        deg_int = int(deg)
+        maxdeg_int = int(maxdeg)
+        maxcoeff_int = int(maxcoeff)
     except ValueError:
-        return Response("Invalid DEG", mimetype="text/plain", status=400)
+        return Response("Invalid maxdeg or maxcoeff", mimetype="text/plain", status=400)
 
-    if deg_int < 1 or deg_int > 25:
-        return Response("Use 1 <= DEG <= 25 for now.", mimetype="text/plain", status=400)
+    if maxdeg_int < 1 or maxdeg_int > 6:
+        return Response("Use 1 <= maxdeg <= 6 for now.", mimetype="text/plain", status=400)
+
+    if maxcoeff_int < 1 or maxcoeff_int > 6:
+        return Response("Use 1 <= maxcoeff <= 6 for now.", mimetype="text/plain", status=400)
 
     with tempfile.TemporaryDirectory() as tmp:
-        result = subprocess.run(
-            ["/app/main"],
-            input=f"{deg_int}\n",
-            text=True,
-            cwd=tmp,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=120
-        )
+        try:
+            result = subprocess.run(
+                ["/app/temp"],
+                input=f"{maxdeg_int} {maxcoeff_int}\n",
+                text=True,
+                cwd=tmp,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=120
+            )
+        except subprocess.TimeoutExpired as e:
+            return Response(
+                "Program timed out.\n\n"
+                + "Try smaller maxdeg/maxcoeff.\n\n"
+                + "STDOUT:\n" + str(e.stdout or "")
+                + "\n\nSTDERR:\n" + str(e.stderr or ""),
+                mimetype="text/plain",
+                status=500
+            )
 
-        out_path = os.path.join(tmp, "out.txt")
+        coeff_path = os.path.join(tmp, "coeff.txt")
 
         if result.returncode != 0:
             return Response(
-                "Program failed.\n\nSTDOUT:\n" + result.stdout + "\n\nSTDERR:\n" + result.stderr,
+                "Program failed.\n\n"
+                + "Return code: " + str(result.returncode)
+                + "\n\nSTDOUT:\n" + result.stdout
+                + "\n\nSTDERR:\n" + result.stderr,
                 mimetype="text/plain",
                 status=500
             )
 
-        if not os.path.exists(out_path):
+        if not os.path.exists(coeff_path):
             return Response(
-                "Program ran but did not create out.txt.\n\nSTDOUT:\n"
-                + result.stdout
-                + "\n\nSTDERR:\n"
-                + result.stderr,
+                "Program ran but did not create coeff.txt.\n\n"
+                + "Return code: " + str(result.returncode)
+                + "\n\nSTDOUT:\n" + result.stdout
+                + "\n\nSTDERR:\n" + result.stderr,
                 mimetype="text/plain",
                 status=500
             )
 
-        with open(out_path, "r") as f:
+        with open(coeff_path, "r") as f:
             text = f.read()
 
     return Response(
         text,
         mimetype="text/plain",
-        headers={"Content-Disposition": "attachment; filename=out.txt"}
+        headers={"Content-Disposition": "attachment; filename=coeff.txt"}
     )
 
 
