@@ -378,8 +378,8 @@ int main() {
 	}
 
 	bool detected = false;
-
-	if (primeValueTest()) {
+    if(g==1){
+    if (primeValueTest()) {
 		cout << "Irreducible by Prime Value Test\n";
 		detected = true;
 	}
@@ -419,7 +419,7 @@ int main() {
 	if (!detected) {
 		cout << "No listed irreducibility criterion detected irreducibility.\n";
 	}
-
+}
 	fmpz_poly_t poly;
 	fmpz_poly_init(poly);
 
@@ -460,11 +460,13 @@ int main() {
 
 	fmpz_clear(content);
 
-	if (!reducibleN0(poly, fac)) {
-		cout << "Irreducible in N0[x]\n";
-	} else {
-		cout << "Reducible in N0[x]\n";
-	}
+	if (g > 1) {
+	cout << "Reducible in N0[x]\n";
+} else if (!reducibleN0(poly, fac)) {
+	cout << "Irreducible in N0[x]\n";
+} else {
+	cout << "Reducible in N0[x]\n";
+}
 
 	fmpz_poly_clear(poly);
 	fmpz_poly_factor_clear(fac);
