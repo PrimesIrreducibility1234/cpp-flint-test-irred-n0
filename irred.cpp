@@ -299,119 +299,175 @@ bool reducibleN0(const fmpz_poly_t F, const fmpz_poly_factor_t fac) {
 
 
 int main() {
-		ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
-		std::ofstream file("coeff.txt");
-		std::streambuf* original_buf = std::cout.rdbuf(); 
-		std::cout.rdbuf(file.rdbuf());
-		int numtested = 0;
-	int maxdeg = 8;
-	int maxcoeff = 5;
-	cin>>maxdeg>>maxcoeff;
-	long long totalnum = 1;
-	for(int i=0; i<=maxdeg; i++) {
-		totalnum = totalnum * (maxcoeff+1);
+	cin.tie(NULL);
+
+	int x;
+	while (cin >> x) {
+		f.pb(x);
 	}
-	f.resize(maxdeg + 1);
-	for(long long index=1; index<totalnum; index++) {
-		numtested++;
-		numodd = 0;
-		maxnum = 0;
-		maxindex = 0;
-		choose.clear();
-		supp = 0;
-		long long tempindex = index;
-		for(int j=0; j<=maxdeg; j++) {
-			f[j] = tempindex % (maxcoeff + 1);
-			tempindex /= (maxcoeff + 1);
-		}
-		deg = f.size() - 1;
-		deg = maxdeg;
-		while (deg >= 0 && f[deg] == 0) {
-			deg--;
-		}
 
-		if (deg <= 1) continue;
-		if (f[0] == 0) continue;
-
-		support.clear();
-		ull g = gcd((int)f[0], (int)f[1]);
-		for (ull i = 2; i <= deg; i++) {
-			g = gcd((int)g, (int)f[i]);
-		}
-		for (int i = deg; i >= 0; i--) {
-			if (f[i] != 0) {
-				support.pb(i);
-				if (i % 2 == 1) numodd++;
-			}
-		}
-		supp = support.size();
-		if (g > 1) continue;
-		for (int i = 0; i <= deg; i++) {
-			if (f[i] > maxnum) {
-				maxnum = f[i];
-				maxindex = i;
-			}
-		}
-
-		for(int i=deg; i>=0; i--) {
-			if(f[i]!=0) {
-				if(i!=deg) cout << " + ";
-				if(f[i]!=1 || i==0)cout << f[i];
-				cout << "x^" << i;
-			}
-		}
-		cout << " ";
-		if (primeValueTest()) cout<<"Irreducible by Prime Value Test";
-		if (eisenstein()) cout<<"Irreducible by Eisenstein";
-		if (perron()) cout<<"Irreducible by Perron";
-		if (ostrowski()) cout<<"Irreducible by Ostrowski";
-		if (bevelacqua()) cout<<"Irreducible by Bevelacqua";
-		if (monolithic()) cout<<"Irreducible by Monolithic Criterion";
-		if (crowdmath()) cout<<"Irreducible by CrowdMath Criterion";
-		if (kolekar()) cout<<"Irreducible by Kolekar-Qiu-Wang";
-		if (bonciocat()) cout<<"Irreducible by Boncionocat";
-
-		
-
-		fmpz_poly_t poly;
-		fmpz_poly_init(poly);
-		forn(i, deg + 1) fmpz_poly_set_coeff_si(poly, i, f[i]);
-
-		fmpz_poly_factor_t fac;
-		fmpz_poly_factor_init(fac);
-		fmpz_poly_factor(fac, poly);
-
-		fmpz_t content;
-		fmpz_init(content);
-		fmpz_poly_content(content, poly);
-
-		/*if (fmpz_cmp_ui(content, 1) != 0 || fac->num > 1 || (fac->num == 1 && fac->exp[0] > 1)) {
-			/*cout<<"Factorization in Z: ";
-			for (int i = 0; i < fac->num; i++) {
-				if(i > 0) cout << " * ";
-				cout << "(";
-				fmpz_poly_print_pretty(fac->p + i, "x");
-				cout << ")";
-				if (fac->exp[i] > 1) {
-					cout << "^" << fac->exp[i];
-				}
-			}
-			cout << "\nReducible in Z[x]" << endl;
-		} else {
-			cout << "Irreducible in Z[x]" << endl;
-		}*/
-
-		fmpz_clear(content);
-
-		if (!reducibleN0(poly, fac)) {
-			cout << " Irreducible in N0" << endl;
-		} else
-			cout << " Reducible in N0" << endl;
-		fmpz_poly_clear(poly);
-		fmpz_poly_factor_clear(fac);
+	if (f.empty()) {
+		cout << "No coefficients given.\n";
+		return 1;
 	}
-    cout.rdbuf(original_buf);
-	file.close();
+
+	deg = (int)f.size() - 1;
+
+	while (deg >= 0 && f[deg] == 0) {
+		deg--;
+	}
+
+	if (deg < 0) {
+		cout << "Zero polynomial.\n";
+		return 0;
+	}
+
+	f.resize(deg + 1);
+
+	numodd = 0;
+	maxnum = 0;
+	maxindex = 0;
+	choose.clear();
+	support.clear();
+	supp = 0;
+
+	if (deg <= 1) {
+		cout << "Trivial to check.\n";
+		return 0;
+	}
+
+	if (f[0] == 0) {
+		cout << "Reducible: divisible by x.\n";
+		return 0;
+	}
+
+	ull g = f[0];
+	for (int i = 1; i <= deg; i++) {
+		g = gcd((int)g, (int)f[i]);
+	}
+
+	for (int i = deg; i >= 0; i--) {
+		if (f[i] != 0) {
+			support.pb(i);
+			if (i % 2 == 1) numodd++;
+		}
+	}
+
+	supp = support.size();
+
+	for (int i = 0; i <= deg; i++) {
+		if ((ull)f[i] > maxnum) {
+			maxnum = f[i];
+			maxindex = i;
+		}
+	}
+
+	cout << "Polynomial: ";
+	for (int i = deg; i >= 0; i--) {
+		if (f[i] != 0) {
+			if (i != deg) cout << " + ";
+			if (f[i] != 1 || i == 0) cout << f[i];
+			if (i >= 1) cout << "x";
+			if (i >= 2) cout << "^" << i;
+		}
+	}
+	cout << "\n";
+
+	if (g > 1) {
+		cout << "Coefficient gcd is " << g << ", so reducible in N0[x] by content.\n";
+	}
+
+	bool detected = false;
+
+	if (primeValueTest()) {
+		cout << "Irreducible by Prime Value Test\n";
+		detected = true;
+	}
+	if (eisenstein()) {
+		cout << "Irreducible by Eisenstein\n";
+		detected = true;
+	}
+	if (perron()) {
+		cout << "Irreducible by Perron\n";
+		detected = true;
+	}
+	if (ostrowski()) {
+		cout << "Irreducible by Ostrowski\n";
+		detected = true;
+	}
+	if (bevelacqua()) {
+		cout << "Irreducible by Bevelacqua\n";
+		detected = true;
+	}
+	if (monolithic()) {
+		cout << "Irreducible by Monolithic Criterion\n";
+		detected = true;
+	}
+	if (crowdmath()) {
+		cout << "Irreducible by CrowdMath Criterion\n";
+		detected = true;
+	}
+	if (kolekar()) {
+		cout << "Irreducible by Kolekar-Qiu-Wang\n";
+		detected = true;
+	}
+	if (bonciocat()) {
+		cout << "Irreducible by Bonciocat\n";
+		detected = true;
+	}
+
+	if (!detected) {
+		cout << "No listed irreducibility criterion detected irreducibility.\n";
+	}
+
+	fmpz_poly_t poly;
+	fmpz_poly_init(poly);
+
+	for (int i = 0; i <= deg; i++) {
+		fmpz_poly_set_coeff_si(poly, i, f[i]);
+	}
+
+	fmpz_poly_factor_t fac;
+	fmpz_poly_factor_init(fac);
+	fmpz_poly_factor(fac, poly);
+
+	fmpz_t content;
+	fmpz_init(content);
+	fmpz_poly_content(content, poly);
+
+	if (fmpz_cmp_ui(content, 1) != 0 || fac->num > 1 || (fac->num == 1 && fac->exp[0] > 1)) {
+		cout << "Factorization in Z[x]: ";
+
+		if (fmpz_cmp_ui(content, 1) != 0) {
+			fmpz_print(content);
+			if (fac->num > 0) cout << " * ";
+		}
+
+		for (int i = 0; i < fac->num; i++) {
+			if (i > 0) cout << " * ";
+			cout << "(";
+			fmpz_poly_print_pretty(fac->p + i, "x");
+			cout << ")";
+			if (fac->exp[i] > 1) {
+				cout << "^" << fac->exp[i];
+			}
+		}
+
+		cout << "\nReducible in Z[x]\n";
+	} else {
+		cout << "Irreducible in Z[x]\n";
+	}
+
+	fmpz_clear(content);
+
+	if (!reducibleN0(poly, fac)) {
+		cout << "Irreducible in N0[x]\n";
+	} else {
+		cout << "Reducible in N0[x]\n";
+	}
+
+	fmpz_poly_clear(poly);
+	fmpz_poly_factor_clear(fac);
 
 	return 0;
 }
