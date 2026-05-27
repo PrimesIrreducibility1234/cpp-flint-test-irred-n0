@@ -292,13 +292,26 @@ bool reducibleN0(const fmpz_poly_t F, const fmpz_poly_factor_t fac) {
 
 
 int main() {
-		ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
-		std::ofstream file("coeff.txt");
-		std::streambuf* original_buf = std::cout.rdbuf(); 
-		std::cout.rdbuf(file.rdbuf());
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
 	int maxdeg = 3;
 	int maxcoeff = 2;
-	cin>>maxdeg>>maxcoeff;
+
+	if (!(cin >> maxdeg >> maxcoeff)) {
+		cerr << "Failed to read maxdeg and maxcoeff\n";
+		return 1;
+	}
+
+	ofstream file("coeff.txt");
+	if (!file.is_open()) {
+		cerr << "Failed to open coeff.txt\n";
+		return 1;
+	}
+
+	streambuf* original_buf = cout.rdbuf();
+	cout.rdbuf(file.rdbuf());
 	long long totalnum = 1;
 	for(int i=0; i<=maxdeg; i++) {
 		totalnum = totalnum * (maxcoeff+1);
