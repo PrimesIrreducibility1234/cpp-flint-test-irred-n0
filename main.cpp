@@ -170,46 +170,109 @@ bool hasMinkowskiDecomp(vector<int> support) {
 }
 
 int main() {
-	std::ofstream file("out.txt");
-	std::streambuf* original_buf = std::cout.rdbuf();
-	std::cout.rdbuf(file.rdbuf());
-	double avgsize = 0;
-	int DEG = 20;
-    cin>> DEG;
-	deg = DEG;
-	mt19937 rng((unsigned)chrono::steady_clock::now().time_since_epoch().count());
-	int skippedBySupportCriteria = 0;
-	int testedExactly = 0;
-
-	for (int mask = 0; mask < (1 << (DEG - 1)); mask++) {
-		support.clear();
-		supp = 2;
+		ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+		std::ofstream file("coeff1.txt");
+		std::streambuf* original_buf = std::cout.rdbuf(); 
+		std::cout.rdbuf(file.rdbuf());
+		int numtested = 0;
+	int maxdeg = 8;
+	int maxcoeff = 5;
+	//cin>>maxdeg>>maxcoeff;
+	long long totalnum = 1;
+	for(int i=0; i<=maxdeg; i++) {
+		totalnum = totalnum * (maxcoeff+1);
+	}
+	f.resize(maxdeg + 1);
+	for(long long index=1; index<totalnum; index++) {
+		if(numtested%6000 == 0)    cerr << "numtested = " << numtested << " / " << totalnum << '\n';
+		numtested++;
 		numodd = 0;
-		support.pb(0);
-		for(int i=1; i<DEG; i++) {
-			if(mask&(1<<(i-1))) {
+		maxnum = 0;
+		maxindex = 0;
+		choose.clear();
+		supp = 0;
+		long long tempindex = index;
+		for(int j=0; j<=maxdeg; j++) {
+			f[j] = tempindex % (maxcoeff + 1);
+			tempindex /= (maxcoeff + 1);
+		}
+		deg = f.size() - 1;
+		deg = maxdeg;
+		while (deg >= 0 && f[deg] == 0) {
+			deg--;
+		}
+
+		if (deg <= 1) continue;
+		if (f[0] == 0) continue;
+
+		support.clear();
+		ull g = gcd((int)f[0], (int)f[1]);
+		for (ull i = 2; i <= deg; i++) {
+			g = gcd((int)g, (int)f[i]);
+		}
+		for (int i = deg; i >= 0; i--) {
+			if (f[i] != 0) {
 				support.pb(i);
-				supp++;
-				if(i%2==1) numodd++;
+				if (i % 2 == 1) numodd++;
 			}
 		}
-		support.pb(DEG);
-		if(DEG%2==1) numodd++;
-
-		reverse(support.begin(), support.end());
-		int totalIrred = 0;
-		int totalTested = 0;
-		if(!monolithic() && !crowdmath()) {
-			if(hasMinkowskiDecomp(support)) {
-				continue;
+		supp = support.size();
+		if (g > 1) continue;
+		for (int i = 0; i <= deg; i++) {
+			if (f[i] > maxnum) {
+				maxnum = f[i];
+				maxindex = i;
 			}
-			forn(i,support.size()) {
-				cout << support[i] << " ";
-			}
-			cout << endl;
+		}
 
+		for(int i=deg; i>=0; i--) {
+			if(f[i]!=0) {
+				if(i!=deg) cout << " + ";
+				if(f[i]!=1 || i==0)cout << f[i];
+				cout << "x^" << i;
+			}
+		}
+		cout << " ";
+		bool irreducible = false;;
+		if (primeValueTest()) {cout << 1; irreducible = true;} else cout<<0;
+		if (eisenstein()) {cout << 1; irreducible = true;} else cout<<0;
+		if (perron()) {cout << 1; irreducible = true;} else cout<<0;
+		if (ostrowski()) {cout << 1; irreducible = true;} else cout<<0;
+		if (bevelacqua()) {cout << 1; irreducible = true;}	 else cout<<0;
+		if (monolithic()) {cout << 1; irreducible = true;} else cout<<0;
+		if (crowdmath()) {cout << 1; irreducible = true;} else cout<<0;
+		if (kolekar()) {cout << 1; irreducible = true;} else cout<<0;
+		if (bonciocat()) {cout << 1; irreducible = true;} else cout<<0;
+
+		
+		if(irreducible){
+			cout << " Irreducible in N0" << endl;
+		}
+		else{
+		fmpz_poly_t poly;
+		fmpz_poly_init(poly);
+		forn(i, deg + 1) fmpz_poly_set_coeff_si(poly, i, f[i]);
+
+		fmpz_poly_factor_t fac;
+		fmpz_poly_factor_init(fac);
+		fmpz_poly_factor(fac, poly);
+
+		fmpz_t content;
+		fmpz_init(content);
+		fmpz_poly_content(content, poly);
+
+		fmpz_clear(content);
+
+		if (!reducibleN0(poly, fac)) {
+			cout << " Irreducible in N0" << endl;
+		} else
+			cout << " Reducible in N0" << endl;
+		fmpz_poly_clear(poly);
+		fmpz_poly_factor_clear(fac);
 		}
 	}
-    std::cout.rdbuf(original_buf);
-    return 0;
+	cout.rdbuf(original_buf);
+	file.close();
+
+	return 0;
 }
