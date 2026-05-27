@@ -82,6 +82,25 @@ HTML = """
 
     <button type="submit">Check Minkowski decomposition</button>
   </form>
+  <form method="POST" action="/check_irred">
+  <h2>Single polynomial irreducibility checker</h2>
+
+  <p>
+    Enter coefficients in increasing degree order. Example:
+    <code>1 3 3 1</code> means
+    <code>1 + 3x + 3x^2 + x^3</code>.
+  </p>
+
+  <p>
+    This runs irred.cpp and prints which irreducibility criteria detect the polynomial,
+    then checks reducibility in <code>Z[x]</code> and <code>N0[x]</code>.
+  </p>
+
+  <label>Coefficients:</label>
+  <input name="coeffs" type="text" value="1 3 3 1" style="width: 350px;">
+
+  <button type="submit">Check polynomial</button>
+</form>
 </body>
 </html>
 """
@@ -281,4 +300,61 @@ def generate_minkowski():
         result.stdout,
         mimetype="text/plain",
         headers={"Content-Disposition": "attachment; filename=minkowski.txt"}
+    )
+  @app.post("/check_irred")
+def check_irred():
+    coeff_text = request.form.get("coeffs", "").strip()
+
+    if not coeff_text:
+        return Response("Enter coefficients, like: 1 3 3 1", mimetype="text/plain", status=400)
+
+    try:
+        coeffs = [int(x) for x in coeff_text.split()]
+    except ValueError:
+        return Response("Coefficients must be space-separated integers.", mimetype="text/plain", status=400)
+
+    if any(c < 0 for c in coeffs):
+        return Response("Coefficients must be nonnegative integers.", mimetype="text/plain", status=400)
+
+    if len(coeffs) > 64:
+        return Response("Use degree <= 63 for now.", mimetype="text/plain", status=400)
+
+    if max(coeffs) > 1000000:
+        return Response("Use coefficients <= 1000000 for now.", mimetype="text/plain", status=400)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            result = subprocess.run(
+                ["/app/irred"],
+                input=" ".join(map(str, coeffs)) + "\n",
+                text=True,
+                cwd=tmp,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=120
+            )
+        except subprocess.TimeoutExpired as e:
+            return Response(
+                "Program timed out.\n\n"
+                + "Try a smaller polynomial.\n\n"
+                + "STDOUT:\n" + str(e.stdout or "")
+                + "\n\nSTDERR:\n" + str(e.stderr or ""),
+                mimetype="text/plain",
+                status=500
+            )
+
+        if result.returncode != 0:
+            return Response(
+                "Program failed.\n\n"
+                + "Return code: " + str(result.returncode)
+                + "\n\nSTDOUT:\n" + result.stdout
+                + "\n\nSTDERR:\n" + result.stderr,
+                mimetype="text/plain",
+                status=500
+            )
+
+    return Response(
+        result.stdout,
+        mimetype="text/plain",
+        headers={"Content-Disposition": "attachment; filename=irred.txt"}
     )
