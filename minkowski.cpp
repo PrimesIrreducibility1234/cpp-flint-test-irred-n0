@@ -180,7 +180,7 @@ vector<int> maskToVec(ull mask) {
 	return v;
 }
 
-MinkowskiResult hasMinkowskiDecomp(vector<int> support) {
+MinkowskiResult getMinkowskiDecomp(vector<int> support) {
 	if (support.size() < 3) return {false,{},{}};
 	if (support.back() != 0) return {false,{},{}};
 	inSupport.assign(deg + 1, false);
